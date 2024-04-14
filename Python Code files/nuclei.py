@@ -8,8 +8,7 @@ from collision import magnitude
 import seaborn
 
 ##2D distribution for nuclei speed and angular scattering. Candidate values for both wil be selected randomly from a range and will 
-##then go through the selector and either be rejected or accepted. temperature value is set as 1K for the moment for cohesiveness with
-## second_sphere.py
+##then go through the selector and either be rejected or accepted.
 
 n=0
 
@@ -28,8 +27,7 @@ def turningpoints(lst):
 # x=np.linspace(0, 2*np.pi)
 # fx = np.power(5.31553155e-12, 2)*pow((pow(5.31553155e-11, 2)+np.power(5.31553155e-12, 2)-2*5.31553155e-12*5.31553155e-11*np.cos(x)),((1/2)+0))
 # print(np.average([x[turningpoints(fx)[0]],x[turningpoints(fx)[0]-1]]))
-#temperature dependent value is a constant so until we get a good approximation for other values we set it to 1
-# temp_vel = 1
+
 
 def u_theta_distrib(u, theta, v, T, specie):
     
@@ -99,32 +97,30 @@ def u_theta_selector(num, v_vect, T, specie):
             accept.append(v)
     # print(f'length of final accept list is {len(accept)}')
     # print(accept)
-    ###plotting
-    j=seaborn.jointplot(x=[t[0] for t in accept], y=[t[1] for t in accept], kind='hex', ratio=2, color='xkcd:sage', joint_kws=dict(gridsize=30), marginal_kws=dict(stat='density'))#,, label=r'Distribution for $10^6$ $u-\theta$ pairs')
-    # # # # plt.scatter(x=[t[0] for t in accept], y=[t[1] for t in accept], color='xkcd:brick', label=r'True Distribution: $n_N (\theta)$')
-    # # # # j.ax_joint.cla()
-    # # # # plt.sca(j.ax_joint)
-    # # # # plt.hist2d([t[0] for t in accept],[t[1] for t in accept],bins=(100, 100), cmap=cm.get_cmap('PuBu'))
-    plt.xlabel(r'$u$ ($m.s^{-1}$)', fontsize=35) 
-    plt.ylabel(r'$\theta$ (rad)', fontsize=35) 
-    plt.ylim(bottom=0)
-    plt.xlim(left=0, right=6000)
-    plt.xticks(fontsize = 30) 
-    plt.yticks(fontsize = 30)
-    # # # plt.ylabel(r'Distribution $n_(r_\chi)$')
-    # # plt.title('Rejection Method for selection of Nuclei parameters using $10^6$ points', fontsize=30, wrap=True)
-    # plt.figure(100)
-    # plt.plot(theta_lin, f, color='xkcd:pinkish', label='scattering angle')
-    # plt.plot(u_lin, f, color='xkcd:cornflower blue', label='speed')
+    
+    ###PLOTTING
+    # j=seaborn.jointplot(x=[t[0] for t in accept], y=[t[1] for t in accept], kind='hex', ratio=2, color='xkcd:sage', joint_kws=dict(gridsize=30), marginal_kws=dict(stat='density'))#,, label=r'Distribution for $10^6$ $u-\theta$ pairs')
+    # # # # # plt.scatter(x=[t[0] for t in accept], y=[t[1] for t in accept], color='xkcd:brick', label=r'True Distribution: $n_N (\theta)$')
+    # plt.xlabel(r'$u$ ($m.s^{-1}$)', fontsize=35) 
+    # plt.ylabel(r'$\theta$ (rad)', fontsize=35) 
+    # plt.ylim(bottom=0)
+    # plt.xlim(left=0, right=6000)
+    # plt.xticks(fontsize = 30) 
+    # plt.yticks(fontsize = 30)
+    # # # # plt.ylabel(r'Distribution $n_(r_\chi)$')
+    # # # plt.title('Rejection Method for selection of Nuclei parameters using $10^6$ points', fontsize=30, wrap=True)
+    # # plt.figure(100)
+    # # plt.plot(theta_lin, f, color='xkcd:pinkish', label='scattering angle')
+    # # plt.plot(u_lin, f, color='xkcd:cornflower blue', label='speed')
 
-    # plt.legend(prop={'size':18})
-    plt.show()
+    # # plt.legend(prop={'size':18})
+    # plt.show()
     # u_selected = accept[np.random.randint(len(accept)-1)][0]
-    theta_selected = accept[np.random.randint(len(accept)-1)][1]
+    # theta_selected = accept[np.random.randint(len(accept)-1)][1]
     return np.array(accept)
 # u_theta_selector(pow(10,6), np.array([3498.56670798, 3722.71667835, 7654.32945363]), 1000, 'H2O')
-##OLD WARNING: selection function for nuclei speed and angular scattering. CAREFUL: units have been changed to m.s^-1 as a test for above function. This is incompatible with units
-##throughout the rest of the code. Will need changing once error is sorted.
+
+##OLD method: selection function for nuclei speed and angular scattering
 def u_theta_selector_deprecated(num, v_vect, T, specie):
     
     samples = []
@@ -154,7 +150,7 @@ def u_theta_selector_deprecated(num, v_vect, T, specie):
 # samples = u_theta_selector_deprecated(num_samples, np.array([2784.5575543195362, 5855.9275485959475, 2415.550264051815]))
 
 # plt.figure(300)
-# # # Plot the samples
+# PLOTTING the samples
 # g=seaborn.jointplot(x=samples[:, 0], y=samples[:, 1], color='xkcd:cornflower blue', label=r'$10^5$ samples', alpha=0.2, ratio=2, marginal_kws=dict(stat='count'))#, kde=True))
 
 
@@ -179,9 +175,9 @@ def u_theta_selector_deprecated(num, v_vect, T, specie):
 #Calculation of nuclei velocity
 #calculation of cartesian vector coordinates by generating random second angle and then transforming from spherical to cartesian
 def calc_hydr_vel(v_vect, T, specie):
-    # max = pow(10,5)
-    #low max to test, needs setting back to 10^5 for good definition and less noise
-    max = pow(10,6)
+    # max = pow(10,6)
+    #low max to test, needs setting back to 10^6 for good definition and less noise
+    max = pow(10,4)
     #getting initial angle and speed
     m = np.random.randint(0, max)
     selection= u_theta_selector(max, v_vect, T, specie)
@@ -197,10 +193,11 @@ def calc_hydr_vel(v_vect, T, specie):
     
     return u_vect_cartesian
 
-test = calc_hydr_vel(np.array([8179.26397901, 19140.44053419, 16681.50315698]), 1000, 'helium')
+# test = calc_hydr_vel(np.array([8179.26397901, 19140.44053419, 16681.50315698]), 1000, 'helium')
 # # test = calc_hydr_vel(np.array([5e-12, 6e-11, 9e-11]), 1, 'idealised')
 # print(test)
-#DEPRECATED:selection of random nuclei and determination of its velocity. Done by rearranging the formula for the dot product operation between 2 vectors.
+
+#DEPRECATED and incorrect method: selection of random nuclei and determination of its velocity. Done by rearranging the formula for the dot product operation between 2 vectors.
 def calc_nuclei_vel(samples, v_vect):
     
     

@@ -4,7 +4,7 @@ import math
 # constants
 m_chi = 1
 n=1
-k_B = (8.617333262)*pow(10,-5) # 1.380649 × 10-23 J/K 8.617333262 ev/K
+k_B = 1.380649 * pow(10,-23)# J/K 8.617333262 ev/K
 m_N = 1
 
 #functions

@@ -26,15 +26,14 @@ import time
 #         next_time += (time.time() - next_time) // time_interval * time_interval + time_interval
 #         # break
  
-    
-        
-
 # def record(position:list, velocity:list, new_position:int, new_velocity:int):
 #     print(new_position)
 #     position.append(new_position)
 #     velocity.append(new_velocity)
 
-        #######MONTE CARLO#######
+
+
+        #######MONTE CARLO: setting up and going through 1 event#######
 samples, r_chi = sp.position_selector(pow(10,6), sp.T_envelope, sp.rho_sho_envelope, sp.m_chi_jup)
 # print(r_chi)
 # r_chi = sp.effective_length(sp.T_envelope[0], sp.rho_sho_envelope[0], sp.m_chi_jup) #in constant temp scenario r_chi = 0.9941442788591482
@@ -104,15 +103,16 @@ def repetition(number:int, array, temp_array, density_array, rho_array, energy_l
             MAIN = {specie1:firstspecie, specie2:secondspecie}
             # print(f'repetition {MAIN}')
             optical_paths = sp.calculate_opt_path(MAIN)
-            #initialising the variable tracking lists: HARDCODED AND SPECIFIC TO HYDROGEN
+            #initialising the variable tracking lists
             initial_particle = MAIN.get(specie1).get(f'w_{specie1}_0') #type:ignore
             
             #when multiple elements exist we are only interest in 1 side of the dictionary after we have calculated the optical depth
             tracked_element = {specie1: MAIN.get(specie1)}
             position_tsim.append(initial_particle[2]) #type:ignore
             velocity_tsim.append(col.magnitude(initial_particle[1])) #type:ignore
-            time_sim_list.append(time_sim)             
-        # if particles is already non-null, it can be used    
+            time_sim_list.append(time_sim) 
+                        
+        # if particles is already non-null, already-existing particle dictionary can be used    
         else:
             
             MAIN = PARTICLES
@@ -155,17 +155,17 @@ def repetition(number:int, array, temp_array, density_array, rho_array, energy_l
                         
                         
                         # cur_radius = sp.conversion_carttospher(particle[2][0], particle[2][1], particle[2][2], angles=False)
+                        
                         # evaporation event: we stop the simulation
                         if (col.magnitude(particle[1]) >= sp.jup_esc_vel) and (position >= sp.r_jup[-1]): #type:ignore
                             
-                            #when break is inserted again, line below should have the radius reset to a certain value so as to not throw off the w calculation function
-                            #temporary values for new position and velocity so as to test time for full implementation of 10^5 collisions. Without these values code runs into error when calculating w at line 112
+                            #line below should have the radius reset to a certain value so as to not throw off the w calculation function
+                            #temporary values for new position and velocity so as to test time for full implementation. Without these values code runs into error when calculating w at line 112
                             particle[1] = np.array([15, 15, 15])
                             particle[2] = 1.5
-
-        
                             print(f"simulation ended because of evaporation. Final values are: {PARTICLES}, and time elapsed was: {time_elapsed} s")
                             return 
+                        
                         # temporary exit of the planet, we calculate new position and velocity differently
                         if (position>sp.r_jup[-1]) and (col.magnitude(velocity_particle) < sp.jup_esc_vel): #type:ignore
                             # print(f'invalid radius is {new_r}')
@@ -227,13 +227,15 @@ def repetition(number:int, array, temp_array, density_array, rho_array, energy_l
                         u_vect = ncl.calc_hydr_vel(v_vect, temperature_val, nuc_specie)
                         
                         # #old r is the same as new r but in cartesian coordinates instead of spherical ones. It is only used during the keplerian orbit section
-                        # old_r = particle[2]                        
+                        # old_r = particle[2]  
+                                              
                         #calculating initial kinetic energy for DM particle using classical KE=0.5*m*v^2
                         kin_bfcollision = 0.5*sp.m_chi_jup*pow(col.magnitude(v_vect),2)
                         
                         # performing collision
                         
                         new_dm_vel = col.collision(v_vect, u_vect)
+                        
                          #If particle has already left and re-entered the planet its position value is already r. So changing position back to radius only if particle has not exited planet (to find values in lookup table)
                         # if timeout != 0.0: 
                         #     new_r = sp.conversion_carttospher(particle[2][0], particle[2][1], particle[2][2], angles=False)
@@ -345,6 +347,7 @@ def density_lte_calc(linspace:np.ndarray):
     linspace = exponential_fact*density_fact
     return linspace 
 
+##Not used: calculations for energy transferred by Dark Matter particle##
 def luminosity_func(energy:list[list], simulation_time:list):
     
     total_time = simulation_time[len(simulation_time)-1]
@@ -363,10 +366,12 @@ def luminosity_func(energy:list[list], simulation_time:list):
     total_luminosity = sum(l[0] for l in Luminosity_sections)
     return Luminosity_sections, total_luminosity, max_luminosity
 
+#Calculations of the standard error for variables calculated via a Monte Carlo simulation
 def standard_err(x:np.ndarray, num_samples):
     
     s = (np.mean(pow(x,2)) - pow(np.mean(x),2))/num_samples
     return s
+###
 
 energy_transfer_record = [[] for _ in range(100)]
 position_record = []
@@ -377,6 +382,7 @@ velocity_record = []
 
 RECORD = {'energy_transfer_record':[]}
 
+                   ##### MONTE CARLO: repetition of collision event#####
 #for i in range (len(K_values)-1):
 for i in range(1):
     # print(f'this is simulation number {i} \n')
@@ -386,10 +392,10 @@ for i in range(1):
     #K=0.1
     k,energy_transfer_record, simulation_time, time_dependent_position, time_dependent_velocity, position, velocity, set_time, final_values = repetition(pow(10,5), sp.r_jup, sp.T_jup, sp.density_jup, sp.rho_sho_jup,energy_transfer_record, position_record, velocity_record, 0.1) #type:ignore
 
-    # K=0.6S
+    # K=0.6
     # energy_transfer_record1, simulation_time1, time_dependent_position1, time_dependent_velocity1, position1, velocity1, set_time1, final_values1 = repetition(pow(10,3), energy_transfer_record, position_record, velocity_record, 0.6) #type:ignore
     
-    # # # # K=2
+    # K=2
     # energy_transfer_record2, simulation_time2, time_dependent_position2, time_dependent_velocity2, position2, velocity2, set_time2, final_values2 = repetition(pow(10,5), energy_transfer_record, position_record, velocity_record, 2) #type:ignore
     
     # energy_transfer_record_{i}, simulation_time_{i}, time_dependent_position_{i}, time_dependent_velocity_{i}, position_{i}, velocity_{i}, set_time_{i}, final_values_{i} = repetition(pow(10,3), energy_transfer_record, position_record, velocity_record, K[i])
@@ -412,6 +418,8 @@ for i in range(1):
     l_val = pow(sp.cross_section_jup*sp.density_envelope[0]*(1/(sp.m_H+sp.m_He)),-1)#+ sp.cross_section_jup*sp.density_core[0]*(1/(2*sp.m_H+sp.m_O)), -1)
     K_val = l_val/r_chi
     print(f'Value for Knudsen number is: {K_val}, and value for scale radius is {r_chi}')
+    
+    
     #PLOTTING
     
     # #density
@@ -512,10 +520,12 @@ for i in range(1):
     
     
     # print(f'\n time-dependent position list is {time_dependent_position}')
+
+#saving collected data in csv file
 df = pd.DataFrame(data)
 df.to_csv('BetterYoungJupiterValues2_020424.csv', index=False)
 
-##Calculation of Monte Carlo variables##
+##Not used: Calculation of energy transferred##
 
 def get_graphs(energy, position):
     sb.kdeplot(x=position, kind='kde', bw_adjust=2.85,)
@@ -528,13 +538,5 @@ def get_graphs(energy, position):
     plt.title(r'Radial distribution of the height of a DM particle over $10^4$ collisions')
     plt.show()
     return
-
-
-       
-
-
-
-
-
 
 

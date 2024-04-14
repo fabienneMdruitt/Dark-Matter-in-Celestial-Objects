@@ -63,14 +63,14 @@ m_chi_jup = 1*1.783*pow(10,-27)#*pow(10,3) #mass of WIMP in kg
 
 r_core = np.linspace(0,12*pow(10,6),800,endpoint=False)
 T_core = [pow(10,4)]*800
-#mass core is 19.98 earth masses according to jupiter paper
+#mass core is 19.98 earth masses
 mass_core = 2*5.972 * pow(10,25)
 rho_sho_core = [3*mass_core*pow(10,3)/(4*np.pi*np.power(r_core[-1]*pow(10,2),3))]*800 
 density_core = [3*mass_core/(4*np.pi*np.power(r_core[-1],3))]*800
 
 r_envelope = np.linspace(12*pow(10,6), 12*pow(10,6)+9*pow(10,7), 1000,endpoint=True)
 T_envelope = [pow(10,3)]*1000
-#mass of enveloppe is 297 earth masses according to jupiter paper
+#mass of enveloppe is 297 earth masses
 mass_envelope = 297*5.972 * pow(10,24)
 rho_sho_envelope = [3*mass_envelope*pow(10,3)/(4*np.pi*((9*pow(10,9))**3))]*1800 #g.cm^-3
 density_envelope = [3*mass_envelope/(4*np.pi*((9*pow(10,7))**3))]*1000
@@ -102,12 +102,7 @@ def cross_section_calc(density, K, r_chi):
     return cross_section
 
 
-# #Creation of idealised body. Parent body of instantiation is None, we consider this idealised body to be the centre of its own system
-# idealised_body = Body(None, k=G* u.Newton*(1* u.m**2)/(1 * u.kg**2)*test_idealised_mass, name='Idealised', R=test_idealised_radius)
-
-
-### Selection function: takes a value for r and returns an index position to choose in the arrays. Decision should be weighted. If r_val not in r, returns 2 index 
-# positions and their respective weightings.
+### Selection function: takes a value for r and returns an index position to choose in the arrays. Decision should be weighted. If r_val not in r, returns 2 index positions and their respective weightings.
 
 def index_selection(r_val, array):
 
@@ -149,12 +144,9 @@ def index_selection(r_val, array):
 
         return dual_index, ratio_hblb
 # print(index_selection(11984889, r_jup))
-## function for calculating values from the arrays if r_val not in r. Should only be called in that specific case: no can include both case of r_val being in array
-# or not
 
+## function for calculating values from the arrays if r_val not in r. Includes both case where r_val being in array and case where it is not.
 def arraybased_value_calc(array, index, ratio):
-    
-
     #r_val in r
     if len(index)==1:
 
@@ -181,14 +173,6 @@ def random_sign():
 
 def main_val_calc(r_val, v_val, array, T, n, rho_sho, velocity_given=False ):
     
-    
-    '''
-    DEPRECATED EXPLANATION: For the moment, to not complicate the code too much, the assumption that the particle is always rotating clockwise and always 
-    travelling towards the outskirts of the planet. At a later date, negatives will need to be introduced within code to symbolise
-    particles travelling towards the planet's core or anti-clockwise. Radially, the particle needs to be confined to the escape 
-    velocity. This simplifies the calculations as there is no need to take into account the x, y and z values to get the radial velocity.
-    Because of dependencies, we have to create the spherical coordinates randomly instead of having them depend on the cartesian coordinates.
-    '''
     #code if we are in first loop of MC and there is no velocity given
     if velocity_given == False:
         v_vect_cart = np.array([np.random.random()*jup_esc_vel*random_sign(),np.random.random()*jup_esc_vel*random_sign(),np.random.random()*jup_esc_vel*random_sign()])
@@ -258,13 +242,10 @@ def calculate_w_const(r_val,v_val,velocity_given,sigma_0, array, temp, density, 
 
 ##print(calculate_w_const(3497189, np.array([-2142.21363642,  2635.83153037, -3219.96514693]), True, cross_section_jup, r_jup, T_jup, density_jup, rho_sho_jup, 'H2O'))   
 
-# print(calculate_w_const(5*pow(10,7), np.array([-2020.45679008, -479.26660591,  1000.77826344]), True, cross_section_jup, r_jup, T_jup, density_jup, rho_sho_jup, 'helium'))  
-### There is no reason to calculate the w_i within the optical path function despite us doing the sum there. The w_i should be calculated beforehand(perhaps with another main function
-# and not directly within code block), and put into a format that is easy to handle by optical path function. Best format would be an array or dictionnary (so that optical
-# path function can call the w_i it wants whilst know what specie it refers to). Easier to not create a whole other function for this.
-
-#09/11/23 BEST OPTION: create a function that calculates for specific values of r_val and only 1 cross-section (perhaps to get updated to multiple cross-sections).
-#Block within code will then calculate the dictionary containning all the cross-sections and r_values. 
+# print(calculate_w_const(5*pow(10,7), np.array([-2020.45679008, -479.26660591,  1000.77826344]), True, cross_section_jup, r_jup, T_jup, density_jup, rho_sho_jup, 'helium')) 
+ 
+### There is no reason to calculate the w_i within the optical path function despite us doing the sum there. The w_i should be calculated beforehand(perhaps with another main function and not directly within code block), and put into a format that is easy to handle by optical path function. Best format would be an array or dictionnary (so that optical path function can call the w_i it wants whilst know what specie it refers to). Easier to not create a whole other function for this.
+#09/11/23 BEST OPTION: create a function that calculates for specific values of r_val and only 1 cross-section (perhaps to get updated to multiple cross-sections). Block within code will then calculate the dictionary containning all the cross-sections and r_values. 
 
 ### MAIN w function, returns dict
 #assumption that values given for r are always within range
@@ -281,9 +262,9 @@ def main_w_calc(r_values:list, velocity_value,velocity_given, specie:str, cross_
         # rad_values.update({f'w_{specie}_{r_values.index(i)}': r_init})
     return w_values
 
-### all calculations of w will be done using the same list of r_values. This makes it easier with the sums in the optical path function as all indexes are linked 
-# despite being from different species.
-# dict for hydrogen values of w
+### all calculations of w will be done using the same list of r_values. This makes it easier with the sums in the optical path function as all indexes are linked despite being from different species.
+
+# TESTING dictionary function
 # hydrogen = main_w_calc([7*pow(10,7)], np.array([-817.17273235, -1785.04387157,  -396.22554864]), True, 'hydrogen', cross_section_jup,r_jup, T_jup, density_jup, rho_sho_jup)
 # helium = main_w_calc([7*pow(10,7)], np.array([ -817.17273235, -1785.04387157,  -396.22554864]), True, 'helium', cross_section_jup,r_jup, T_jup, density_jup,rho_sho_jup)
 # hydrogen = main_w_calc([5*pow(10,4)], np.array([ -817.17273235, -1785.04387157,  -396.22554864]), True, 'hydrogen', cross_section_jup,r_jup, T_jup, rho_sho_jup)
@@ -292,16 +273,12 @@ def main_w_calc(r_values:list, velocity_value,velocity_given, specie:str, cross_
 # H2O = main_w_calc([7*pow(10,4)], np.array([-2817.17273235, -4785.04387157,  -396.22554864]), True, 'H2O', cross_section_jup,r_jup, T_jup, density_jup, rho_sho_jup)
 # MAIN = {'hydrogen': {'w_hydrogen_0': [0.10008596909080825, np.array([-0.00386101, -0.00547548, -0.00307676]), 2.9804605263569846]}}
 # MAIN = {'H2O': hydrogen}#, 'helium':helium}#, 'test_specie':{'test 16': [-2, np.array([1,1,1]), -4], 'test 45':[-1, np.array([1,1,1]), -6]}}
-# MAIN dictionary will have structure {{'hydrogen-dict':{hydrogen dict}},'helium-dict':{helium-dict}...} with internal dictionnaries having structure {'w_r-val': w_r-val,...}
-#  to account for velocity changing with time the internal dictionaries can have key-value pairs with lists as values. Each list would contain the different values for w
-#  at different velocities.
+
+# MAIN dictionary has structure {{'hydrogen-dict':{hydrogen dict}},'helium-dict':{helium-dict}...} with internal dictionnaries having structure {'w_r-val': w_r-val,...}
+
 # print(MAIN)
 ''' 
-optical depth: relates a time interval t to the sum of the total rates omega_i with which a WIMP of velocity v scatters with the ith nuclear species
-
-to create more flexibility in optical length function the input is not the direct dictionary created in main_w_calc but rather the parts of the dict we want to access
-Because main dictionary contains values for multiple r, calculation of optical path outputs values for each path corresponding to a different r_val. Perhaps best to
-output dict so that it is possible to find by labelling.
+optical depth: relates a time interval t to the sum of the total rates omega_i with which a WIMP of velocity v scatters with the ith nuclear species to create more flexibility in optical length function the input is not the direct dictionary created in main_w_calc but rather the parts of the dict we want to access. Because main dictionary contains values for multiple r, calculation of optical path outputs values for each path corresponding to a different r_val. It is better to output dict so that it is possible to find elements through labelling.
 '''
 
 slopes = []
@@ -332,11 +309,10 @@ def calculate_opt_path(dictionary: dict[str, dict]):
       
     for r_val in opt_path:
 
-        ### selecting target tau and imposing restriction on low values       
+        ### selecting target tau and possibility of imposing restriction on low values       
         target_tau = pick_target_tau()
         # while target_tau < 1e-6:
         #     target_tau = pick_target_tau()
-        # target_tau = 5.16
         # print(f'Target optical depth is: {target_tau}')
         opt_path[r_val] = sum(opt_path.get(r_val)) #type:ignore
         # print(f'target_tau:{target_tau}')
@@ -347,24 +323,15 @@ def calculate_opt_path(dictionary: dict[str, dict]):
 
             dtau_dt = sum_w
             return dtau_dt
-        
-
-
-        
-        
            
             #RK45 to get optical path,then add value to opt_path dictionary
         '''
             the parameters are chosen to be the following: opt_path_funct is the equation we are using for the optical length, it
-            is given in the initial paper; initial time t_0 is set to 0, initial optical path y_0 is set to 0, t_bound is dt and
-            is set to 0.5 (unsure about units, probably seconds). Discussion during supervisor meeting confirmed that 0.5s for dt is 
-            too long to be realistic.
+            is given in the initial paper; initial time t_0 is set to 0, initial optical path y_0 is set to 0, t_bound is dt.
         '''
-        
         
         t_min = 0.0
         dt = pow(10,50)  ### any dt that is smaller always outputs the same values regardless of the change in value of sum_w
-        
 
         if specie.get(r_value)[2] < 12*pow(10,6): #type: ignore
             max_step = 1e-1
@@ -410,6 +377,7 @@ def calculate_opt_path(dictionary: dict[str, dict]):
                     else:
                         opt_path[r_val] = (t_values[len(t_values)-3] + t_values[len(t_values)-2])/2
 
+                # PLOTTING
                 # f, ax = plt.subplots()
                 # plt.scatter(t_values, tau_values, s=50, color= 'xkcd:crimson')
                 # plt.xlabel(r'Time t (s)', fontsize=35)
@@ -432,10 +400,9 @@ def calculate_opt_path(dictionary: dict[str, dict]):
                 intercepts.append(intercept)                    
                 break
                 
-
+           
+            # Test warns you that your value for t might not be accurate. 
             
-            # for the moment this test does nothing except from warn you that your value for t might not be accurate. Further calculations could be done so that t=0 or
-            # another abnormal value if that's the case. This would allow us to remove t from the final optical path dictionary completely.
             if optical_path.t ==dt and optical_path.y[0] < target_tau:
                 print(f'target tau is {target_tau}, and the optical depth reached is {optical_path.y[0]}')
                 error = (abs(optical_path.y[0] - target_tau)/target_tau)*100
@@ -447,22 +414,16 @@ def calculate_opt_path(dictionary: dict[str, dict]):
                     opt_path[r_val] = optical_path.y[0]
                     print('target not reached but within limit')
                 break
-         
 
-
-             
                
                     ##changing value for optical path
         # print(t_values, tau_values)
                 
-        #would a normal integration work for this initial constant function that has no dependence on t? No it wouldn't work as well.
+        #Testing a normal integration work for this initial constant function that has no dependence on t. 
         
         # optical_path = integrate.quad(lambda t: opt_path_funct(sum_w), a=t_min, b=dt)
         
         # checking_lst.append(optical_path)
-
-
-
         
     return opt_path
 
@@ -476,13 +437,12 @@ def calculate_opt_path(dictionary: dict[str, dict]):
 
 #####CALCULATION OF NEW POSITION AND VELOCITY using equations in appendix of paper. 
 
-#For the moment t used in equations A.1 and A.2 get replaced by the optical length. Choice of creating a singular function for both
-#as both depend on initial velocity and initial positions. Initial position/velocity is a vector, optical length is a float.
+#t used in equations A.1 and A.2 get replaced by the values found by optical path function above. We made the choice of creating a singular function for both as both depend on initial velocity and initial positions. Initial position and velocity are vectors.
 
 # print(slopes, intercepts)
 def new_coords_cart(optical_path, initial_pos, initial_vel, rho_sho):
     #defining constants omega, A_i, and a_i
-    #initial_pos = initial_pos#*pow(10,-2) #conversion from cm to m to be coherent with velocity of particle expressed in m/s
+    #initial_pos = initial_pos#*pow(10,-2) #conversion from cm if needed to m to be coherent with velocity of particle expressed in m/s
     # print({f'new coords cart:initial position has been converted to metres and is: {initial_pos}'})
     omega = np.sqrt((4/3)*np.pi*G*rho_sho)
     
@@ -503,8 +463,6 @@ def new_coords_cart(optical_path, initial_pos, initial_vel, rho_sho):
                -A_z*omega*np.sin(omega*optical_path+a_z)]
     
     return np.array(new_pos), np.array(new_vel)
-
-
 
 
 #converting radius to a position vector that is in cartesian coordinates.
@@ -548,7 +506,7 @@ def position_distrib(r):
     distribution = (np.exp(-r/r_chi)**2)/pow(r_chi,3)*pow(np.pi, 3/2)
     
 
-    
+    #PLOTTING
     # plt.plot(distribution, linestyle='dotted')
     
     # plt.ylim(ymin=0)
@@ -566,7 +524,7 @@ def position_distrib(r):
   
 def position_selector(num, T_val, rho_sho_val, m_chi_val):
     
-    #m_chi_val = m_chi_val * pow(10,-3) #conversion of DM particle mass into kg
+    #m_chi_val = m_chi_val * pow(10,-3) #conversion of DM particle mass into if needed kg
     
     
     r_sho= effective_length(T_val[0], rho_sho_val[0], m_chi_val)#calculation of effective scale for simple harmonic oscillator. Set to 1 for idealised scenario
@@ -695,6 +653,8 @@ def velocity_selector(r:float, array, m_chi_val):
     return np.array(velocity)
 # velocity_selector(1, r,1)
 # print(velocity_selector(7*pow(10,6), r_jup, m_chi_jup))
+
+
 #getting initial velocity and position from MAIN dictionary by assuming particle undergoes SHM until time of next collision
 def main_calculations_velpos(main_dictionary, optical_path_dictionary, result = 'dictionary', coords = 'cartesian'):
     optical_path = 0.0
@@ -749,11 +709,7 @@ def main_calculations_velpos(main_dictionary, optical_path_dictionary, result = 
         print(main_dictionary, optical_path_dictionary) 
  
     return main_dictionary, optical_path
-                    #decision to not append the new position and velocity to the main_dictionary because the difference is not that big. It is also not very important
-                    #as we are more interested in the change in vectors due to collision with nuclei.So we replace the old position within the main_dictionary
-                    #completely. Any type of value record will be done within the main collision function. Note that here we don't change the position vector back to 
-                    #a singular value for radius as we use cartesian coordinates for the colision. The transformation back into spherical coordinates in time to
-                    #draw from lookup table again will be done after calling collision function.
+#decision to not append the new position and velocity found by the main_calculations_velpos function to the main_dictionary as this would ladden the dictionary with too much unecessary data. These new values are not essential to track as we are more interested in the change in vectors due to collision with nuclei. So we replace the old position within the main_dictionary completely. Any type of value record will be done within the main Monte Carlo simulation file. Note that here we don't change the position vector back to a singular value for radius as we use cartesian coordinates for the colision. The transformation back into spherical coordinates in time to draw from lookup table again will be done after calling collision function.
     # print(f'updated dictionary: \n {main_dictionary}')
 
 # print(main_calculations_velpos(MAIN, optical_paths))
@@ -884,6 +840,7 @@ def keplerian_radius(theta,a=2.5,e=0.2,r0=3):
     # radius = theta**3-1
     # return radius
 
+#Old function for the particle's Keplerian orbit out of the planet. Not used as there were issues with the libraries needed.
 # def keplerian_orbit(vel_0, pos_0):
 #     print(f'initial position was {conversion_carttospher(pos_0[0], pos_0[1], pos_0[2])}, initial velocity was {vel_0}')
 #     pos_0 = pos_0*u.meter
@@ -965,8 +922,8 @@ def keplerian_radius(theta,a=2.5,e=0.2,r0=3):
     
 #     return radius, vel, time_reenter
 # print(keplerian_orbit(np.array([0.43895555, 0.00146178, 0.41054838]), np.array([1.2, 0.5, 2.77])))
-## function that calculates the new position and velocity vectors using equations adapted to spherical coordinates. Not used because working with cartesian coordinates
-## was deemed a better strategy.
+
+## function that calculates the new position and velocity vectors using equations adapted to spherical coordinates. Not used because working with cartesian coordinates was deemed a better strategy.
 
 def new_coords_spher(optical_path, initial_pos, initial_vel, rho_sho):
     #defining constants omega, B_i, and b_i
@@ -998,6 +955,4 @@ def new_coords_spher(optical_path, initial_pos, initial_vel, rho_sho):
     # new_vel = [r_vel, phi_vel, theta_vel]
     
     # return new_pos, new_vel 
-    
-
-                                                                                                                                                                                                  
+                                                                                                                                                                                                    

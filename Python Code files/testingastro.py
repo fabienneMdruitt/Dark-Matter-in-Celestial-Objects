@@ -1,3 +1,5 @@
+"This file was used mostly for testing, but includes code created to plot fig.1 (showing evolution of Knudsen number with respect to the Dark matter particle mass in different celestial objects) and table III (showing calculations of the Knudsen number in our Young Jupiter models using different methods)."
+
 # from math import log10
 
 # from matplotlib.lines import lineStyles
